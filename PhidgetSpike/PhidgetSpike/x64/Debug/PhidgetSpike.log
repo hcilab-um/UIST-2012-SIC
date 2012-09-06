@@ -1,0 +1,30 @@
+﻿Build started 9/6/2012 12:35:22 PM.
+     1>Project "C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\PhidgetSpike\PhidgetSpike.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x64\Debug\PhidgetSpike.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       ClCompile:
+         All outputs are up-to-date.
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Program Files\Phidgets" /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /clr /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"x64\Debug\PhidgetSpike.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /TP /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /errorReport:prompt PhidgetSpike.cpp /clr:nostdlib 
+         PhidgetSpike.cpp
+         All outputs are up-to-date.
+       ResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\x64\Debug\PhidgetSpike.exe" /INCREMENTAL /NOLOGO /MANIFEST /ManifestFile:"x64\Debug\PhidgetSpike.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\x64\Debug\PhidgetSpike.pdb" /ASSEMBLYDEBUG /TLBID:1 /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X64 x64\Debug\app.res
+         x64\Debug\AssemblyInfo.obj
+         x64\Debug\PhidgetSpike.obj
+         x64\Debug\stdafx.obj
+         "x64\Debug\.NETFramework,Version=v4.0.AssemblyAttributes.obj"
+         PhidgetSpike.vcxproj -> C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\x64\Debug\PhidgetSpike.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\x64\Debug\PhidgetSpike.exe;#1" /manifest x64\Debug\PhidgetSpike.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "x64\Debug\PhidgetSpike.unsuccessfulbuild".
+         Touching "x64\Debug\PhidgetSpike.lastbuildstate".
+     1>Done Building Project "C:\Users\xiang\Documents\GitHub\UIST-2012-SIC\PhidgetSpike\PhidgetSpike\PhidgetSpike.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.32
