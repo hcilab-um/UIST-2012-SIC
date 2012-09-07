@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 			processor.print();	//give status
         }
     }
-    while (!_kbhit());
+    while (!_kbhit());	//Until key is pressed
 
 	/****************** Shutdown sequence **********************/
 

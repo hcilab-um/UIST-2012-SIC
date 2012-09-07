@@ -8,6 +8,7 @@
 
 Processor::Processor(void)
 {
+	fingerMapRequired = true;
 }
 
 void Processor::createPacket(ISynDevice* device)
@@ -25,7 +26,7 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 	}
 
 	int newFingerCount = 0;
-	for (int i = 0; i < MAX_FINGERS; ++i)
+	for (int i = 0; i < MAX_FINGERS; ++i)	//Check new fingers state
     {    
 		// Load data into the SynPacket object
 		dataGroup->GetPacketByIndex(i, _packet);
@@ -47,7 +48,12 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 		}
 	}
 
-	if ((curFingerCount != MAX_FINGERS) && (newFingerCount == MAX_FINGERS))	
+
+	if ((curFingerCount >= (MAX_FINGERS-1)) && (newFingerCount < (MAX_FINGERS-1)))		//unless only one finger was lifted we need to remap fingers
+		fingerMapRequired = true;
+
+
+	if ((fingerMapRequired) && (newFingerCount == MAX_FINGERS))	
 	{	//5 fingers found - new detection formation, update finger roles
 		
 		vector <sortPair> xSortArray;	//sort fingers from left to right
@@ -64,6 +70,8 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 		puppet->body["head"]->linkFinger(xSortArray.at(2).second);
 		puppet->body["rHand"]->linkFinger(xSortArray.at(3).second);
 		puppet->body["rLeg"]->linkFinger(xSortArray.at(4).second);
+
+		fingerMapRequired = false;	//done
 	}
 
 	curFingerCount = newFingerCount;

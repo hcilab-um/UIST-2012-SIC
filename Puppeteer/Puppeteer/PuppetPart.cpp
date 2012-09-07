@@ -43,7 +43,11 @@ void PuppetPart::linkFinger(Finger* finger)
 
 void PuppetPart::move()
 {
+	if (!active)		//Finger has been lifted, don't move part
+		return;
+
 	long newForce = finger->getForce();
+	
 	if (newForce > curForce)	//Need to pull part up
 	{
 		//servo->move
@@ -59,6 +63,11 @@ void PuppetPart::move()
 bool PuppetPart::isActive()
 {
 	return active;
+}
+
+void PuppetPart::setActive(bool activate)
+{
+	active = activate;
 }
 
 PuppetPart::~PuppetPart(void)

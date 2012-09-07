@@ -19,6 +19,7 @@ public:
 	//Servo motor;
 	PuppetPart(string name);
 	void clearFinger();
+	void setActive(bool activate);
 	void linkFinger(Finger* finger);
 	bool isActive();
 	void move();

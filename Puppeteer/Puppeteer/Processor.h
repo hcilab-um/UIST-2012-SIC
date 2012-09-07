@@ -14,6 +14,7 @@ private:
 	Finger fingers[MAX_FINGERS];
 	int curFingerCount;
 	ISynPacket* _packet;
+	bool fingerMapRequired;
 public:
 	void createPacket(ISynDevice* device);
 	void processData(Puppet* puppet, ISynGroup* dataGroup);
