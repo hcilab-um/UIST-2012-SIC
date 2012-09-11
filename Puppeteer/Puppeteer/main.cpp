@@ -5,6 +5,7 @@
 #include <SynKit.h>
 #include "Processor.h"
 #include "Puppet.h"
+#include "Servo.h"
 
 
 using namespace std;
@@ -59,8 +60,9 @@ int main(int argc, char** argv)
 
 	Puppet* puppet = new Puppet();
 	
-	Processor processor;
-	processor.createPacket(pDevice);
+	Processor processor(pDevice);
+
+	printf("\nPlace hand on ForcePad to start!\n");
 
     do
     {

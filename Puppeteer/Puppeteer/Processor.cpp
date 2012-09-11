@@ -6,8 +6,9 @@
 #include <vector>
 
 
-Processor::Processor(void)
+Processor::Processor(ISynDevice* device)
 {
+	createPacket(device);
 	fingerMapRequired = true;
 }
 
@@ -81,19 +82,14 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 void Processor::print()
 {
-	if (curFingerCount != MAX_FINGERS)
-	{
-		printf("\nCan't operate puppet unless 5 fingers are detected!\n");
-		return;
-	}
-	
 	for (long i = 0; i < MAX_FINGERS; ++i)
 	{
-		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%ld)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPart()->getForce());
+		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
 	}
-	SYSTEMTIME st;
-    
+
+	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
+
 	printf("time: %ld.%ld ms \n\n", st.wSecond, st.wMilliseconds);
 	
 }

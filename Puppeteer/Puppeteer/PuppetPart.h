@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "Definitions.h"
+#include "Servo.h"
 
 
 
@@ -13,10 +15,11 @@ private:
 	bool active;
 	long curForce;
 	string name;
+	double target;
 public:
 	Finger* finger;
 
-	//Servo motor;
+	Servo* motor;
 	PuppetPart(string name);
 	void clearFinger();
 	void setActive(bool activate);
@@ -24,6 +27,7 @@ public:
 	bool isActive();
 	void move();
 	string getName();
+	double getTarget();
 	long getForce();
 	~PuppetPart(void);
 };

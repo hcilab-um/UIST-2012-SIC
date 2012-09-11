@@ -8,7 +8,13 @@ PuppetPart::PuppetPart(string name)
 {
 	clearFinger();
 	curForce = 0;
+	target = 0;
 	this->name = name;
+
+	
+	if (!name.compare("Head"))
+		motor = new Servo();	//temp test initialization
+	else motor = NULL;
 }
 
 string PuppetPart::getName()
@@ -19,6 +25,11 @@ string PuppetPart::getName()
 long PuppetPart::getForce()
 {
 	return curForce;
+}
+
+double PuppetPart::getTarget()
+{
+	return target;
 }
 
 void PuppetPart::clearFinger()
@@ -47,15 +58,17 @@ void PuppetPart::move()
 		return;
 
 	long newForce = finger->getForce();
+
+	if (newForce > MAX_FORCE)	//Don't pull more than maximum
+		newForce = MAX_FORCE;
 	
-	if (newForce > curForce)	//Need to pull part up
-	{
-		//servo->move
-	}
-	else if (newForce < curForce) 	//Need to release part
-	{
-		//servo->move
-	}
+	double forceRatio = (double) newForce / MAX_FORCE;	//How much force is exerted relative to the max
+	double relativeLocationFactor = (MAX_SERVO_LOCATION - MIN_SERVO_LOCATION);
+
+	target = forceRatio * relativeLocationFactor;	//move to relative location on motor
+	
+	if (motor) 
+		motor->move(target);	
 
 	curForce = newForce;
 }
@@ -72,4 +85,5 @@ void PuppetPart::setActive(bool activate)
 
 PuppetPart::~PuppetPart(void)
 {
+	delete motor;	//clean servos
 }

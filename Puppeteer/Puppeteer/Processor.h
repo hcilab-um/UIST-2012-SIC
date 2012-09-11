@@ -20,7 +20,7 @@ public:
 	void processData(Puppet* puppet, ISynGroup* dataGroup);
 	void print(void);	
 
-	Processor(void);
+	Processor(ISynDevice* device);
 	~Processor(void);
 };
 

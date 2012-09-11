@@ -1,1 +1,4 @@
 #define MAX_FINGERS 5
+#define MAX_FORCE 500
+#define MAX_SERVO_LOCATION 180
+#define MIN_SERVO_LOCATION 0

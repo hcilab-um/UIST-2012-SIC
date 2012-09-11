@@ -35,9 +35,12 @@ string Finger::getPartName()
 		return "None";
 }
 
-PuppetPart* Finger::getPart()
+double Finger::getPartTarget()
 {
-	return partControlled;
+	if (partControlled)
+		return partControlled->getTarget();
+
+	else return -1;		//Signal no location
 }
 
 long Finger::getX()

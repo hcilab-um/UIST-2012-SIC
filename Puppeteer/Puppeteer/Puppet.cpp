@@ -13,7 +13,7 @@ Puppet::Puppet(void)
 
 void Puppet::move()
 {
-	//Order - Right Leg, Left Leg, Right Hand, Left Hand, Head?s
+	//Order - Right Leg, Left Leg, Right Hand, Left Hand, Head?
 	map<string, PuppetPart*>::iterator iter;
 	for (iter = body.begin(); iter != body.end(); ++iter)
 	{
@@ -32,5 +32,5 @@ Puppet::~Puppet(void)
 	delete body["lHand"];
 	delete body["head"]; 
 	delete body["rHand"];
-	delete body["rLeg"]; 
+	delete body["rLeg"];
 }
