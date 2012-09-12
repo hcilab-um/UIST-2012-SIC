@@ -1,6 +1,8 @@
 #include "StdAfx.h"
-#include "Servo.h"
+#include "ServoC.h"
 #include <windows.h>
+
+//Servo Controller class
 
 int CCONV AttachHandler(CPhidgetHandle ADVSERVO, void *userptr)
 {
@@ -56,12 +58,12 @@ int display_properties(CPhidgetAdvancedServoHandle phid)
 	return 0;
 }
 
-Servo::Servo(void)
+ServoC::ServoC(void)
 {
 	int result;
 	double curr_pos;
 	const char *err;
-	double maxAccel, maxVel;
+	int motorCount;
 
 	//Declare an advanced servo handle
 	servo = 0;
@@ -92,63 +94,76 @@ Servo::Servo(void)
 
 	//Display the properties of the attached device
 	display_properties(servo);
+	CPhidgetAdvancedServo_getMotorCount(servo, &motorCount);
 
 	//read event data
 	printf("Reading.....\n");
 
-	//This example assumes servo motor is attached to index 0
-
+	/*
 	//Set up some initial acceleration and velocity values
 	CPhidgetAdvancedServo_getAccelerationMax(servo, 0, &maxAccel);
 	CPhidgetAdvancedServo_setAcceleration(servo, 0, maxAccel);
 	CPhidgetAdvancedServo_getVelocityMax(servo, 0, &maxVel);
 	CPhidgetAdvancedServo_setVelocityLimit(servo, 0, maxVel/2);
-
+	*/
 	//display current motor position
 	if(CPhidgetAdvancedServo_getPosition(servo, 0, &curr_pos) == EPHIDGET_OK)
 		printf("Motor: 0 > Current Position: %f\n", curr_pos);
 
 	Sleep(1000);
 	
-	//change the motor position
-	//valid range is -23 to 232, but for most motors ~30-210
-	//we'll set it to a few random positions to move it around
-
-	//Step 1: Position 40.00 - also engage servo
-	printf("Move to position 80.00 and engage.\n");
-	Sleep(1000);
+	double test;
+	int error;
 	
-	CPhidgetAdvancedServo_setPosition (servo, 0, 80.00);
-	CPhidgetAdvancedServo_setEngaged(servo, 0, 1);
+	for (int i = 0; i < motorCount; i++)
+	{
+		CPhidgetAdvancedServo_setServoType(servo, i, PHIDGET_SERVO_SPRINGRC_SM_S4315R);
+		CPhidgetAdvancedServo_setPositionMin(servo, i, MOVE_C_CLOCKWISE_LOCATION);
+		CPhidgetAdvancedServo_setPositionMax(servo, i, MOVE_CLOCKWISE_LOCATION);
 
-	//Position 0
-	printf("Move to position 0. \n");
-	Sleep(1000);
+		printf("Move to position 50 (stop) and engage.\n");
+		CPhidgetAdvancedServo_setPosition (servo, i, STOP_LOCATION);
+		error = CPhidgetAdvancedServo_getCurrent(servo, i, &test);
+		CPhidgetAdvancedServo_setEngaged(servo, i, 1);
+		printf("error: %d , Pos: %f\n", error, test);
 
-	CPhidgetAdvancedServo_setPosition (servo, 0, 0);
+	}
+	
 }
 
-void Servo::move(double target)
+void ServoC::setMovement(servoMovement movement, int motorId)
 {
-	double currentVelocity;
-	CPhidgetAdvancedServo_getVelocity(servo, 0, &currentVelocity);
+	double targetPosition;	//Used to control movement direction and speed, 50 stops, 0 C_Clockwise, 100 Clockwise
+	
+	switch (movement)
+	{
+		case eC_Clockwise:
+			targetPosition = MOVE_C_CLOCKWISE_LOCATION;
+			break;
+		case eStopped:
+			targetPosition = STOP_LOCATION;
+			break;
+		case eClockwise:
+			targetPosition = MOVE_CLOCKWISE_LOCATION;
+			break;
+	}
 
-	if ((currentVelocity > 0) && (target == MAX_SERVO_LOCATION))	//Already aiming for MAX
-		return;
-
-	if ((currentVelocity < 0) && (target == MIN_SERVO_LOCATION))	//Already aiming for MIN
-		return;
-
-	CPhidgetAdvancedServo_setPosition (servo, 0, target);
+	CPhidgetAdvancedServo_setPosition(servo, motorId, targetPosition);	//Set relevant motor's movement
 }
 
 
-Servo::~Servo(void)
+ServoC::~ServoC(void)
 {
 	//Disengage
 	printf("Disengage Servo\n");
 
-	CPhidgetAdvancedServo_setEngaged(servo, 0, 0);
+	int motorCount;
+	CPhidgetAdvancedServo_getMotorCount(servo, &motorCount);
+
+	for (int i = 0; i < motorCount; i++)
+	{
+		CPhidgetAdvancedServo_setEngaged(servo, i, 0);
+	}
 
 	//since user input has been read, this is a signal to terminate the program so we will close the phidget and delete the object we created
 	printf("Closing...\n");

@@ -8,6 +8,7 @@ using namespace std;
 class Puppet
 {
 public:
+	ServoC* controller;
 	map<string, PuppetPart*> body;
 	Puppet(void);
 	void move();

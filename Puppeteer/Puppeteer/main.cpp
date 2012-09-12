@@ -5,7 +5,7 @@
 #include <SynKit.h>
 #include "Processor.h"
 #include "Puppet.h"
-#include "Servo.h"
+#include "ServoC.h"
 
 
 using namespace std;

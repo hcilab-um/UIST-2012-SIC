@@ -2,7 +2,7 @@
 
 #include <string>
 #include "Definitions.h"
-#include "Servo.h"
+#include "ServoC.h"
 
 
 
@@ -16,11 +16,16 @@ private:
 	long curForce;
 	string name;
 	double target;
+	long curTicks;	//Current location of motor, tick = length of string pulled or released every ~10ms
+	long maxTicks;	//Maximum time for part pull
+	bool isPullClockwise;	//true if clockwise motion will pull string up
+	servoMovement curMovement;
+	int motorId;
 public:
 	Finger* finger;
+	ServoC* motor;
 
-	Servo* motor;
-	PuppetPart(string name);
+	PuppetPart(string name, long maxTicks, ServoC* controller, int motorId, bool isPullClockwise );
 	void clearFinger();
 	void setActive(bool activate);
 	void linkFinger(Finger* finger);
