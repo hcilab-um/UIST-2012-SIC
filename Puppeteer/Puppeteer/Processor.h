@@ -16,8 +16,10 @@ private:
 	ISynPacket* _packet;
 	bool fingerMapRequired;
 public:
-	void createPacket(ISynDevice* device);
+	void createPacket(ISynDevice* device); 
 	void processData(Puppet* puppet, ISynGroup* dataGroup);
+	long getFingerAvg_x();
+	long getFingerAvg_y();
 	void print(void);	
 
 	Processor(ISynDevice* device);

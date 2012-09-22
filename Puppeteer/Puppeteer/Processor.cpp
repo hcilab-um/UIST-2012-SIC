@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <vector>
 
-
 Processor::Processor(ISynDevice* device)
 {
 	createPacket(device);
@@ -80,12 +79,39 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 	puppet->move();		//send movement commands to servos
 }
 
+long Processor::getFingerAvg_x()
+{
+	long sum = 0;
+	for(int i=0; i<MAX_FINGERS; i++)
+	{
+		if(fingers[i].getX() == -1)
+			return -1;
+		sum+=fingers[i].getX();
+
+	}
+	return sum/MAX_FINGERS;
+}
+
+long Processor::getFingerAvg_y()
+{
+	long sum = 0;
+	for(int i = 0; i < MAX_FINGERS; i++)
+	{
+		if(fingers[i].getY() == -1)
+			return -1;
+		sum += fingers[i].getY();
+	}
+	return sum / MAX_FINGERS;
+}
+
 void Processor::print()
 {
 	for (long i = 0; i < MAX_FINGERS; ++i)
 	{
 		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
 	}
+
+	printf("Finger Center Coords(%4d, %4d)\n", getFingerAvg_x(), getFingerAvg_y());
 
 	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
