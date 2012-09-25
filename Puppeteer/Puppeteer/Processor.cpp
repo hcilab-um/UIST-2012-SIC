@@ -81,27 +81,50 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 long Processor::getFingerAvg_x()
 {
+	if(curFingerCount<4)
+		return -1;
 	long sum = 0;
 	for(int i=0; i<MAX_FINGERS; i++)
 	{
-		if(fingers[i].getX() == -1)
-			return -1;
-		sum+=fingers[i].getX();
-
+		if(fingers[i].getX()>=0)
+			sum+=fingers[i].getX();
 	}
-	return sum/MAX_FINGERS;
+	return sum/curFingerCount;
 }
 
-long Processor::getFingerAvg_y()
+int Processor::detectCenterPosition()
 {
-	long sum = 0;
-	for(int i = 0; i < MAX_FINGERS; i++)
+	if(getFingerAvg_x()<0)
 	{
-		if(fingers[i].getY() == -1)
-			return -1;
-		sum += fingers[i].getY();
+		return 0;
 	}
-	return sum / MAX_FINGERS;
+
+	if(getFingerAvg_x() < THRESHOLD_LEFT_FOUR)
+	{
+		if((curFingerCount>4 && getFingerAvg_x() > THRESHOLD_LEFT_FIVE) || curFingerCount==4)
+		{
+			return -1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if(getFingerAvg_x() > THRESHOLD_RIGHT_FOUR)
+	{
+		if((curFingerCount>4 && getFingerAvg_x() > THRESHOLD_RIGHT_FIVE) || curFingerCount==4)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0; 
+	}
 }
 
 void Processor::print()
@@ -111,7 +134,7 @@ void Processor::print()
 		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
 	}
 
-	printf("Finger Center Coords(%4d, %4d)\n", getFingerAvg_x(), getFingerAvg_y());
+	printf("Finger Center: %d\n", detectCenterPosition());
 
 	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
