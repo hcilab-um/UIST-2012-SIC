@@ -21,6 +21,9 @@ private:
 	bool isPullClockwise;	//true if clockwise motion will pull string up
 	servoMovement curMovement;
 	int motorId;
+	int speedLevel;
+	void updateTicks(servoMovement& targetMovement, long& targetTicks);
+	double oldTime, currentTime;	//QPC
 public:
 	Finger* finger;
 	ServoC* motor;
@@ -30,7 +33,7 @@ public:
 	void setActive(bool activate);
 	void linkFinger(Finger* finger);
 	bool isActive();
-	void move();
+	void move(ofstream& myfile);
 	string getName();
 	double getTarget();
 	long getForce();

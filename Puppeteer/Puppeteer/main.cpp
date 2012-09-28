@@ -7,7 +7,8 @@
 #include "Puppet.h"
 #include "ServoC.h"
 
-
+#include <fstream>
+#include "Definitions.h"
 using namespace std;
 
 #pragma comment(lib, "SynCOM.lib") // For access point SynCreateAPI
@@ -63,21 +64,21 @@ int main(int argc, char** argv)
 	Processor processor(pDevice);
 
 	printf("\nPlace hand on ForcePad to start!\n");
-
+	
     do
     {
         // Wait until the event signals that data is ready
-        WaitForSingleObject(hEvent, INFINITE);
+        WaitForSingleObject(hEvent, MAX_INPUT_WAIT);
 
         // Load data into the ISynGroup instance, repeating until there is no more data
         while (pDevice->LoadGroup(pGroup) != SYNE_FAIL)
-        {            
+		{
 			processor.processData(puppet, pGroup);	//Read data and perform logic
 			processor.print();	//give status
         }
     }
     while (!_kbhit());	//Until key is pressed
-
+	
 	/****************** Shutdown sequence **********************/
 
 	delete puppet;

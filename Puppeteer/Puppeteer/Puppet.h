@@ -3,15 +3,22 @@
 #include <string>
 #include <map>
 
+#include <fstream>
+
 using namespace std;
 
 class Puppet
 {
+private:
+	long wheelTicks;
+	handLocation curWheelMovement;
+	void moveWheels(handLocation curHandLocation);
 public:
 	ServoC* controller;
+	ofstream myfile;
 	map<string, PuppetPart*> body;
 	Puppet(void);
-	void move();
+	void move(handLocation curHandLocation);
 	~Puppet(void);
 };
 

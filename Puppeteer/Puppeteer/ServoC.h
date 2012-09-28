@@ -8,6 +8,7 @@ class ServoC
 {
 private:
 	CPhidgetAdvancedServoHandle servo;
+	CPhidgetAdvancedServoHandle servo2;
 
 public:
 	

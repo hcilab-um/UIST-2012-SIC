@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 
+
 Processor::Processor(ISynDevice* device)
 {
 	createPacket(device);
@@ -50,7 +51,10 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 
 	if ((curFingerCount >= (MAX_FINGERS-1)) && (newFingerCount < (MAX_FINGERS-1)))		//unless only one finger was lifted we need to remap fingers
+	{
 		fingerMapRequired = true;
+		disconnectFingers();
+	}
 
 
 	if ((fingerMapRequired) && (newFingerCount == MAX_FINGERS))	
@@ -76,55 +80,11 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 	curFingerCount = newFingerCount;
 
-	puppet->move();		//send movement commands to servos
-}
+	handCenter = getFingerAvg_x();
 
-long Processor::getFingerAvg_x()
-{
-	if(curFingerCount<4)
-		return -1;
-	long sum = 0;
-	for(int i=0; i<MAX_FINGERS; i++)
-	{
-		if(fingers[i].getX()>=0)
-			sum+=fingers[i].getX();
-	}
-	return sum/curFingerCount;
-}
+	handLocation curHandLocation = getHandCenterPosition();
 
-int Processor::detectCenterPosition()
-{
-	if(getFingerAvg_x()<0)
-	{
-		return 0;
-	}
-
-	if(getFingerAvg_x() < THRESHOLD_LEFT_FOUR)
-	{
-		if((curFingerCount>4 && getFingerAvg_x() > THRESHOLD_LEFT_FIVE) || curFingerCount==4)
-		{
-			return -1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else if(getFingerAvg_x() > THRESHOLD_RIGHT_FOUR)
-	{
-		if((curFingerCount>4 && getFingerAvg_x() > THRESHOLD_RIGHT_FIVE) || curFingerCount==4)
-		{
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		return 0; 
-	}
+	puppet->move(curHandLocation);		//send movement commands to servos
 }
 
 void Processor::print()
@@ -134,7 +94,7 @@ void Processor::print()
 		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
 	}
 
-	printf("Finger Center: %d\n", detectCenterPosition());
+	printf("Finger Center: %d\n", getHandCenterPosition());
 
 	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
@@ -149,6 +109,56 @@ bool cmpByX(const sortPair& a, const sortPair& b)
 		return true;
 	else
 		return false;
+}
+
+handLocation Processor::getHandCenterPosition()
+{
+	if (handCenter < 0)
+		return eCenter;		//Default to center position
+
+	if (curFingerCount == MAX_FINGERS)
+	{
+		if (handCenter < FIVE_FINGERS_LEFT)
+			return eLeft;
+		else if (handCenter > FIVE_FINGERS_RIGHT)
+			return eRight;
+
+	}
+	else if (curFingerCount == 4)	//4 fingers average has a different threshold
+	{
+		if (handCenter < FOUR_FINGERS_LEFT)
+			return eLeft;
+		else if  (handCenter > FOUR_FINGERS_RIGHT)
+			return eRight;
+	}
+	
+	//Center position or less than 4 fingers
+	return eCenter; 
+}
+
+double Processor::getFingerAvg_x()
+{
+	if (curFingerCount<4)
+		return -1;	//not enough fingers
+
+	long xFinger,sum = 0;
+	for(int i=0; i<MAX_FINGERS; i++)
+	{
+		xFinger = fingers[i].getX();
+		if(xFinger >= 0)
+			sum += xFinger;
+	}
+
+	return (double) (sum/curFingerCount);
+}
+
+
+void Processor::disconnectFingers()
+{
+	for (int i=0; i < MAX_FINGERS; ++i)
+	{
+		fingers[i].updateControl(NULL);	//clears all fingers
+	}
 }
 
 Processor::~Processor(void)
