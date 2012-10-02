@@ -38,7 +38,7 @@ PuppetPart::PuppetPart(string name, long maxTicks, ServoC* controller, int motor
 	curMovement = eStopped;
 	curTicks = 0;
 	speedLevel = 0; oldTime =0; currentTime = 0; StartCounter();
-	target = 0;
+	targetTicks = 0;
 	active = false;
 	this->name = name;
 	this->maxTicks = maxTicks;
@@ -61,9 +61,14 @@ long PuppetPart::getForce()
 	return curForce;
 }
 
-double PuppetPart::getTarget()
+long PuppetPart::getCurrentTicks()
 {
 	return curTicks;
+}
+
+long PuppetPart::getTargetTicks()
+{
+	return targetTicks;
 }
 
 void PuppetPart::clearFinger()
@@ -88,7 +93,7 @@ void PuppetPart::linkFinger(Finger* finger)
 
 void PuppetPart::move(ofstream& myfile)
 {
-	long targetTicks, newForce;
+	long newForce;
 	servoMovement targetMovement;
 
 	if (!active)		//Finger has been lifted, release part
@@ -110,6 +115,8 @@ void PuppetPart::move(ofstream& myfile)
 		//double relativeLocationFactor = (MAX_SERVO_LOCATION - MIN_SERVO_LOCATION);
 
 		targetTicks = (long) (forceRatio * maxTicks);	//move to relative location on motor
+		int pulleyLevel = (targetTicks / THRESHOLD_TICKS);
+		targetTicks = (long) (pulleyLevel * THRESHOLD_TICKS);
 	}
 	
 	if (curTicks < targetTicks)		//Need to pull string
@@ -128,7 +135,7 @@ void PuppetPart::move(ofstream& myfile)
 	
 	else if (curTicks > targetTicks)	//Need to release string
 	{
-		if ((curTicks >= (targetTicks+THRESHOLD_TICKS)) || ((targetTicks == 0) && (curTicks > MAX_SPEED_LEVEL)))
+		if ((curTicks >= (targetTicks+THRESHOLD_TICKS)) || ((targetTicks <= 0) && (curTicks > 2*MAX_SPEED_LEVEL)))
 		//if ((curTicks < maxTicks) || (targetTicks <= (maxTicks-THRESHOLD_TICKS)))	//don't move when force is slightly weaker than max
 		{
 			if (isPullClockwise)	//figure release direction
@@ -144,8 +151,8 @@ void PuppetPart::move(ofstream& myfile)
 	//updateSpeed(targetMovement);
 	
 		oldTime = currentTime;
-	if (getName() == "Left Leg")
-	myfile << "curMov:" << curMovement << ",tarMov:" << targetMovement <<",ticks:" << curTicks <<","<< targetTicks << "|" << (currentTime - oldTime) << endl;
+	if (getName() == "Right Leg")
+	myfile << "curMov:" << curMovement << ",tarMov:" << targetMovement <<",ticks:" << curTicks <<","<< targetTicks << "|" << speedLevel << endl;
 	/*
 	if (getName() == "Left Leg" && (getch() == 'z'))
 	do
@@ -295,7 +302,7 @@ void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
 			speedLevel--;
 		
 		if (curMovement == eC_Clockwise)	//change speed direction fast
-			speedLevel = 0;
+			speedLevel = 1;
 	}
 	else if (targetMovement == eC_Clockwise)
 	{
@@ -305,17 +312,25 @@ void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
 			speedLevel++;
 
 		if (curMovement != eC_Clockwise)	//change speed direction
-			speedLevel = 0;
+			speedLevel = -1;
 	}
 	else	//Stopping
 	{
-		if (curMovement == eClockwise)	//ccompensate for clockwise weak stopping
-			curTicks++;//+=(MAX_SPEED_LEVEL-1);
+		if (curMovement == eClockwise) //ccompensate for clockwise weak stopping
+		{
+			if (isPullClockwise)
+				curTicks++;
+			else
+				curTicks--;
+		}
 
+		/*
 		if (speedLevel > 0)
 			speedLevel--;
 		else if (speedLevel < 0)
 			speedLevel++;
+			*/
+		speedLevel = 0;
 	}
 
 	//update ticks

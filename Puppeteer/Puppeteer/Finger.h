@@ -16,7 +16,8 @@ public:
 	Finger(void);
 	void remove(void);
 	string getPartName();
-	double getPartTarget();
+	long getPartTarget();
+	long getTicks();
 	void updateControl(PuppetPart* puppetPart);
 	void updateData(ISynPacket* data);
 	long getX(void);
