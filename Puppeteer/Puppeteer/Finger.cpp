@@ -38,10 +38,18 @@ string Finger::getPartName()
 		return "None";
 }
 
-double Finger::getPartTarget()
+long Finger::getPartTarget()
 {
 	if (partControlled)
-		return partControlled->getTarget();
+		return partControlled->getTargetTicks();
+
+	else return -1;		//Signal no location
+}
+
+long Finger::getTicks()
+{
+	if (partControlled)
+		return partControlled->getCurrentTicks();
 
 	else return -1;		//Signal no location
 }

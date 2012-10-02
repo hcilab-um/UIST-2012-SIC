@@ -9,9 +9,9 @@ Puppet::Puppet(void)
 
 	body["lLeg"] = new PuppetPart("Left Leg", LEG_MAX_TICKS, controller, 3, true);	//MotorId - 0-3 are servo1, 4-6 are servo2
 	body["lHand"] = new PuppetPart("Left Hand", HAND_MAX_TICKS, controller, 2, true);
-	body["head"] = new PuppetPart("Head", HEAD_MAX_TICKS, controller, 4, true);
-	body["rHand"] = new PuppetPart("Right Hand", HAND_MAX_TICKS, controller, 1, true);
-	body["rLeg"] = new PuppetPart("Right Leg", LEG_MAX_TICKS, controller, 0, true);
+	body["head"] = new PuppetPart("Head", HEAD_MAX_TICKS, controller, 7, true);	//disabled
+	body["rHand"] = new PuppetPart("Right Hand", HAND_MAX_TICKS, controller, 1, false);
+	body["rLeg"] = new PuppetPart("Right Leg", LEG_MAX_TICKS, controller, 0, false);
 
 	wheelTicks = 0;
 	curWheelMovement = eCenter;

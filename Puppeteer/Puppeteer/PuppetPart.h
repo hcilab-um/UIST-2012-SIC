@@ -15,7 +15,7 @@ private:
 	bool active;
 	long curForce;
 	string name;
-	double target;
+	long targetTicks;
 	long curTicks;	//Current location of motor, tick = length of string pulled or released every ~10ms
 	long maxTicks;	//Maximum time for part pull
 	bool isPullClockwise;	//true if clockwise motion will pull string up
@@ -35,7 +35,8 @@ public:
 	bool isActive();
 	void move(ofstream& myfile);
 	string getName();
-	double getTarget();
+	long getTargetTicks();
+	long getCurrentTicks();
 	long getForce();
 	~PuppetPart(void);
 };

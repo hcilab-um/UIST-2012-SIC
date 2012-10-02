@@ -91,10 +91,10 @@ void Processor::print()
 {
 	for (long i = 0; i < MAX_FINGERS; ++i)
 	{
-		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
+		printf("Finger %d: Coords(%4d, %4d), f: %ld grams, ctrl: %s (%ld/%ld)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getTicks(), fingers[i].getPartTarget());
 	}
 
-	printf("Finger Center: %d\n", getHandCenterPosition());
+	printf("Finger Center: %.2f,(%d)\n", handCenter, getHandCenterPosition());
 
 	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
