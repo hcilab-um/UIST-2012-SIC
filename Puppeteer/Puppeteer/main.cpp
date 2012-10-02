@@ -6,7 +6,6 @@
 #include "Processor.h"
 #include "Puppet.h"
 #include "ServoC.h"
-
 #include <fstream>
 #include "Definitions.h"
 using namespace std;
@@ -65,6 +64,10 @@ int main(int argc, char** argv)
 
 	printf("\nPlace hand on ForcePad to start!\n");
 	
+	//char variable to receive r(read), p(play), s(stop) and q(quit) command
+	char command=-1;
+	bool toRecord=false;
+	bool toPlay=false;
     do
     {
         // Wait until the event signals that data is ready
@@ -73,11 +76,40 @@ int main(int argc, char** argv)
         // Load data into the ISynGroup instance, repeating until there is no more data
         while (pDevice->LoadGroup(pGroup) != SYNE_FAIL)
 		{
-			processor.processData(puppet, pGroup);	//Read data and perform logic
-			processor.print();	//give status
+			//playing data
+			if(toPlay)
+			{
+				printf("Playing...\n");
+			}
+			else
+			{
+				processor.processData(puppet, pGroup);	//Read data and perform logic
+				processor.print();	//give status
+			}
         }
-    }
-    while (!_kbhit());	//Until key is pressed
+
+		//when a key is pressed, check if it is r(read), p(play), q(quit) command
+		if(_kbhit())
+		{
+			command=_getch();
+			printf("%c\n",command);
+			//if user press r(record), program should only record data
+			if(command == 'r')
+			{
+				processor.startRecord();
+			}
+			//if user press p(play), program should only play data
+			if(command == 'p')
+			{
+				//processor.startPlay();
+			}
+			//if user press s(stop), program should not play or record
+			if(command == 's')
+			{
+				processor.stopRecordPlay();
+			}
+		}
+    }while (command!='q');	//Until q(quit) key is pressed
 	
 	/****************** Shutdown sequence **********************/
 

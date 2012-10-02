@@ -4,12 +4,13 @@
 
 #include <algorithm>
 #include <vector>
-
+#include <fstream>
 
 Processor::Processor(ISynDevice* device)
 {
 	createPacket(device);
 	fingerMapRequired = true;
+	curCondition=stop;
 }
 
 void Processor::createPacket(ISynDevice* device)
@@ -74,7 +75,6 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 		puppet->body["head"]->linkFinger(xSortArray.at(2).second);
 		puppet->body["rHand"]->linkFinger(xSortArray.at(3).second);
 		puppet->body["rLeg"]->linkFinger(xSortArray.at(4).second);
-
 		fingerMapRequired = false;	//done
 	}
 
@@ -83,19 +83,31 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 	handCenter = getFingerAvg_x();
 
 	handLocation curHandLocation = getHandCenterPosition();
-
-	puppet->move(curHandLocation);		//send movement commands to servos
+	puppet->move(curHandLocation, curCondition, recordFile);		//send movement commands to servos
 }
 
 void Processor::print()
 {
-	for (long i = 0; i < MAX_FINGERS; ++i)
+	//when playing file, puppet is not reading data from force pad
+	if(curCondition==play)
 	{
-		printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
+		printf("Playing...\n");
 	}
+	else
+	{
+		
+		if(curCondition==record)
+		{
+			//show that program is recording data
+			printf("Recording...\n");
+		}
 
-	printf("Finger Center: %d\n", getHandCenterPosition());
-
+		for (long i = 0; i < MAX_FINGERS; ++i)
+		{
+			printf("Finger %d: Coords(%4d, %4d), force: %ld grams, controlling: %s (%4.1f)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getPartTarget());
+		}
+		printf("Finger Center: %d\n", getHandCenterPosition());
+	}
 	SYSTEMTIME st;  //Time printing
     GetSystemTime(&st);
 
@@ -152,6 +164,18 @@ double Processor::getFingerAvg_x()
 	return (double) (sum/curFingerCount);
 }
 
+//setup for record, get record file, set condition as record
+void Processor::startRecord()
+{
+	curCondition=record;
+	recordFile =fopen("C:\\PuppetFile\\puppetRecord.txt","w+");
+}
+
+//terminate all record and play process
+void Processor::stopRecordPlay()
+{
+	curCondition=stop;
+}
 
 void Processor::disconnectFingers()
 {

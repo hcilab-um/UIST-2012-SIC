@@ -18,7 +18,7 @@ public:
 	ofstream myfile;
 	map<string, PuppetPart*> body;
 	Puppet(void);
-	void move(handLocation curHandLocation);
+	void move(handLocation curHandLocation, recordPlayCondition condition, FILE* recordFile);
 	~Puppet(void);
 };
 

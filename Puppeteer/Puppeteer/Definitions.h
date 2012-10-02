@@ -36,3 +36,10 @@ enum handLocation{
 	eCenter = 0,
 	eRight = 1
 };
+
+enum recordPlayCondition
+{
+	record = 'r',
+	stop = 's',
+	play = 'p'
+};

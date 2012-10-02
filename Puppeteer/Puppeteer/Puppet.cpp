@@ -19,7 +19,7 @@ Puppet::Puppet(void)
 	myfile.open ("example.txt");
 }
 
-void Puppet::move(handLocation curHandLocation)
+void Puppet::move(handLocation curHandLocation, recordPlayCondition condition, FILE* recordFile)
 {
 	//Order - Right Leg, Left Leg, Right Hand, Left Hand, Head?
 	map<string, PuppetPart*>::iterator iter;
@@ -27,9 +27,15 @@ void Puppet::move(handLocation curHandLocation)
 	{
 		iter->second->move(myfile);	//decide if part needs moving
 	}
-
 	moveWheels(curHandLocation);
-
+	if(condition==record)
+	{
+		for (iter = body.begin(); iter != body.end(); ++iter)
+		{
+			fprintf(recordFile, "%ld,",iter->second->getForce());	//decide if part needs moving
+		}
+		fprintf(recordFile,"%d\n",curHandLocation);
+	}
 }
 
 void Puppet::moveWheels(handLocation curHandLocation)
