@@ -9,7 +9,7 @@ using namespace std;
 class Finger
 {
 private:
-	long _lX, _lY, _lZForce;
+	long _lX, _lY;
 	PuppetPart* partControlled;
 
 public:
@@ -23,6 +23,7 @@ public:
 	long getX(void);
 	long getY(void);
 	long getForce(void);
+	long _lZForce;
 	~Finger(void);
 };
 

@@ -47,10 +47,6 @@ PuppetPart::PuppetPart(string name, long maxTicks, ServoC* controller, int motor
 	this->motorId = motorId;	//Id of motor controlling current part
 }
 
-
-
-
-
 string PuppetPart::getName()
 {
 	return name;

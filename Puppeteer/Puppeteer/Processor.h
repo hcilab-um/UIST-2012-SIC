@@ -18,7 +18,9 @@ private:
 	void disconnectFingers();
 	double handCenter;
 	FILE* recordFile;
-	recordPlayCondition curCondition;
+	FILE* playFile;
+	handLocation curHandLocation;
+	
 public:
 	void createPacket(ISynDevice* device);
 	void processData(Puppet* puppet, ISynGroup* dataGroup);
@@ -26,7 +28,9 @@ public:
 	double getFingerAvg_x();
 	handLocation getHandCenterPosition();
 	void startRecord();
+	void startPlay();
 	void stopRecordPlay();
+	recordPlayCondition curCondition;
 	Processor(ISynDevice* device);
 	~Processor(void);
 };

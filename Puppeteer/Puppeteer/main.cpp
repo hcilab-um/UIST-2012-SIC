@@ -66,26 +66,16 @@ int main(int argc, char** argv)
 	
 	//char variable to receive r(read), p(play), s(stop) and q(quit) command
 	char command=-1;
-	bool toRecord=false;
-	bool toPlay=false;
     do
     {
         // Wait until the event signals that data is ready
         WaitForSingleObject(hEvent, MAX_INPUT_WAIT);
-
+		
         // Load data into the ISynGroup instance, repeating until there is no more data
-        while (pDevice->LoadGroup(pGroup) != SYNE_FAIL)
+		while (processor.curCondition==play||(pDevice->LoadGroup(pGroup) != SYNE_FAIL))
 		{
-			//playing data
-			if(toPlay)
-			{
-				printf("Playing...\n");
-			}
-			else
-			{
-				processor.processData(puppet, pGroup);	//Read data and perform logic
-				processor.print();	//give status
-			}
+			processor.processData(puppet, pGroup);	//Read data and perform logic
+			processor.print();	//give status
         }
 
 		//when a key is pressed, check if it is r(read), p(play), q(quit) command
@@ -101,7 +91,7 @@ int main(int argc, char** argv)
 			//if user press p(play), program should only play data
 			if(command == 'p')
 			{
-				//processor.startPlay();
+				processor.startPlay();
 			}
 			//if user press s(stop), program should not play or record
 			if(command == 's')
