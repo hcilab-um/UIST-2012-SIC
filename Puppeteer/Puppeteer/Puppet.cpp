@@ -38,6 +38,30 @@ void Puppet::move(handLocation curHandLocation, recordPlayCondition condition, F
 	}
 }
 
+void Puppet::moveWheelsCenter()
+{
+	//adjust the wheel, until it get center: wheelTicks=0
+	while(wheelTicks!=0)
+	{
+		//on left side
+		if(wheelTicks>0)
+		{
+			//move right
+			controller->setMovement(eC_Clockwise,5);
+			controller->setMovement(eClockwise,6);
+			wheelTicks--;
+		}
+		else	//on right side
+		{
+			//move left
+			controller->setMovement(eC_Clockwise,5);
+			controller->setMovement(eClockwise,6);
+			wheelTicks++;
+		}
+	}
+
+}
+
 void Puppet::moveWheels(handLocation curHandLocation)
 {
 	//Back wheel is motorId 6 (counter-clockwise left), front is motorId 5 (clockwise left)

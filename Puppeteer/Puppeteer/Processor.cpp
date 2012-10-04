@@ -30,6 +30,8 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 	int newFingerCount = 0;
 	curHandLocation=eCenter;
+	
+	//if not playing from file, just do as it was
 	if(curCondition != play)
 	{
 		for (int i = 0; i < MAX_FINGERS; ++i)	//Check new fingers state
@@ -89,11 +91,16 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 	}
 	else
 	{
+		//if playing from file, make sure it gives same time delaying as before
 		Sleep(13);
+		
+		//check if the file is being correctly read(if it gets to end of file)
 		if(6==fscanf(playFile, "%ld,%ld,%ld,%ld,%ld,%d\n", &fingers[0]._lZForce, &fingers[1]._lZForce, &fingers[2]._lZForce, &fingers[3]._lZForce, &fingers[4]._lZForce, &curHandLocation))
 		{
+			//check if the finger has been mapped
 			if(curFingerCount==-1)
 			{
+				//if not, simply map it in sequence
 				puppet->body["lLeg"]->linkFinger(&fingers[0]);				//this coulds be in play process once
 				puppet->body["lHand"]->linkFinger(&fingers[1]);
 				puppet->body["head"]->linkFinger(&fingers[2]);
@@ -104,9 +111,16 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 		}
 		else
 		{
+			//if cant read from file, stop replaying
 			curCondition=stop;
+			//set default value for center point
 			handCenter = -1;
 			printf("Finish Playing\n");
+
+			//move puppet back to center
+			puppet->moveWheelsCenter();
+			
+			//terminate this process
 			return;
 		}
 
@@ -119,12 +133,13 @@ void Processor::processData(Puppet* puppet, ISynGroup* dataGroup)
 
 void Processor::print()
 {
-		//when playing file, puppet is not reading data from force pad
+	//when playing file, puppet is not reading data from force pad
 	if(curCondition==play)
 	{
 		printf("Playing...\n");
 		for (long i = 0; i < MAX_FINGERS; ++i)
 		{
+			//coordinate value is not available, just show finger force value
 			printf("Finger %d: f: %ld grams, ctrl: %s\n", i, fingers[i].getForce(), fingers[i].getPartName().c_str());
 		}
 		printf("Finger Center: (%d)\n", curHandLocation);
@@ -137,7 +152,6 @@ void Processor::print()
 			//show that program is recording data
 			printf("Recording...\n");
 		}
-
 		for (long i = 0; i < MAX_FINGERS; ++i)
 		{
 			printf("Finger %d: Coords(%4d, %4d), f: %ld grams, ctrl: %s (%ld/%ld)\n", i, fingers[i].getX(), fingers[i].getY(), fingers[i].getForce(), fingers[i].getPartName().c_str(), fingers[i].getTicks(), fingers[i].getPartTarget());
@@ -206,7 +220,7 @@ double Processor::getFingerAvg_x()
 void Processor::startRecord()
 {
 	curCondition=record;
-	recordFile =fopen("C:\\PuppetFile\\puppetRecord.txt","w+");
+	recordFile =fopen("C:\\PuppetFile\\puppetRecord.txt","w");
 	printf("START RECORD\n");
 }
 

@@ -19,6 +19,7 @@ public:
 	map<string, PuppetPart*> body;
 	Puppet(void);
 	void move(handLocation curHandLocation, recordPlayCondition condition, FILE* recordFile);
+	void moveWheelsCenter();
 	~Puppet(void);
 };
 
