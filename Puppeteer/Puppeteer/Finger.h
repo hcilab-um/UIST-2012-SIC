@@ -13,6 +13,7 @@ private:
 	PuppetPart* partControlled;
 
 public:
+	long _lZForce;
 	Finger(void);
 	void remove(void);
 	string getPartName();
@@ -23,7 +24,6 @@ public:
 	long getX(void);
 	long getY(void);
 	long getForce(void);
-	long _lZForce;
 	~Finger(void);
 };
 

@@ -17,20 +17,21 @@ private:
 	bool fingerMapRequired;
 	void disconnectFingers();
 	double handCenter;
+	handLocation curHandLocation;
+
+public:
 	FILE* recordFile;
 	FILE* playFile;
-	handLocation curHandLocation;
-	
-public:
 	void createPacket(ISynDevice* device);
 	void processData(Puppet* puppet, ISynGroup* dataGroup);
 	void print(void);
 	double getFingerAvg_x();
-	handLocation getHandCenterPosition();
-	void startRecord();
-	void startPlay();
+	handLocation getHandCenterPosition(Puppet* puppet);
+	void startRecord(char* filename);
+	void startPlay(char* filename);
 	void stopRecordPlay();
-	recordPlayCondition curCondition;
+	recordPlayMode curMode;
+
 	Processor(ISynDevice* device);
 	~Processor(void);
 };

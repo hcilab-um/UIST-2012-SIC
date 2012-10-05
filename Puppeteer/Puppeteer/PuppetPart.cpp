@@ -45,7 +45,101 @@ PuppetPart::PuppetPart(string name, long maxTicks, ServoC* controller, int motor
 	this->isPullClockwise = isPullClockwise;
 	motor = controller;	//access to servo controller
 	this->motorId = motorId;	//Id of motor controlling current part
+	TESTCOUNTER = 0, TESTDIR =1;
+
+	fillCorrections();
+	movLength = 0;
+	inMovement = false;
 }
+
+
+void PuppetPart::fillCorrections()
+{
+	if (getName() == "Left Leg")
+	for (int i = 0; i < LEG_MAX_TICKS+THRESHOLD_TICKS; i++)
+	{
+		if (i == 0)
+			correction[i] = eC_Clockwise;	//Servo stops wrong on counter clockwise
+		//else if (i <= 3)
+		//	correction[i] = 0;//1;
+		//else if (i <= 9)
+		//	correction[i] = 1;//2;
+		else if (i <= 20)
+			correction[i] = 0;//3;
+		else if (i <= 30)
+			correction[i] = 0;//4;
+		else if (i <= 40)
+			correction[i] = 2;//5;
+		else if (i <= 50)
+			correction[i] = 2;//6;
+		//else if (i <= 60)
+		//	correction[i] = 3;
+		//else if (i <= 70)
+		//	correction[i] = 3;
+
+	}
+
+	else if (getName() == "Left Hand")
+	for (int i = 0; i < LEG_MAX_TICKS+THRESHOLD_TICKS; i++)
+	{
+		if (i == 0)
+			correction[i] = eClockwise;		//Servo stops wrong on counter clockwise
+		else if (i <= 20)
+			correction[i] = 1;//3;
+		else if (i <= 30)
+			correction[i] = 1;//4;
+		else if (i <= 40)
+			correction[i] = 1;//5;
+		else if (i <= 50)
+			correction[i] = 1;//6;
+		else if (i <= 60)
+			correction[i] = 3;
+		else if (i <= 70)
+			correction[i] = 3;
+	}
+
+	else if (getName() == "Right Hand")
+	for (int i = 0; i < LEG_MAX_TICKS+THRESHOLD_TICKS; i++)
+	{
+		if (i == 0)
+			correction[i] = eClockwise;	//Servo stops wrong on clockwise
+		else if (i <= 20)
+			correction[i] = 4;
+		else if (i <= 30)
+			correction[i] = 4;
+		else if (i <= 40)
+			correction[i] = 4;
+		else if (i <= 50)
+			correction[i] = 4;
+		//else if (i <= 60)
+		//	correction[i] = 4;
+		//else if (i <= 70)
+		//	correction[i] = 4;
+	}
+	else if (getName() == "Right Leg")
+	for (int i = 0; i < LEG_MAX_TICKS+THRESHOLD_TICKS; i++)
+	{
+		if (i == 0)
+			correction[i] = eClockwise;		//Servo stops wrong on clockwise
+		else if (i <= 9)
+			correction[i] = 1;//2;
+		else if (i <= 20)
+			correction[i] = 2;//3;
+		else if (i <= 30)
+			correction[i] = 2;//4;
+		else if (i <= 50)
+			correction[i] = 2;//5;
+		else if (i <= 60)
+			correction[i] = 2;
+		else if (i <= 70)
+			correction[i] = 2;
+	}
+	else
+		for (int i = 0; i < LEG_MAX_TICKS+THRESHOLD_TICKS; i++)
+			correction[i] = 0;
+
+}
+
 
 string PuppetPart::getName()
 {
@@ -89,89 +183,93 @@ void PuppetPart::linkFinger(Finger* finger)
 
 void PuppetPart::move(ofstream& myfile)
 {
-	long newForce;
 	servoMovement targetMovement;
 
-	if (!active)		//Finger has been lifted, release part
+	calcTargetByForce();
+
+	if (!inMovement)
+		moveToTicks = targetTicks;	//Update target
+	
+
+	if (((curTicks < moveToTicks) && (inMovement)) || ((curTicks < moveToTicks-THRESHOLD_TICKS) && (!inMovement)))		//Need to pull string
 	{
-		targetTicks = MIN_FORCE;
-		newForce = MIN_FORCE;
+		if (isPullClockwise)	//figure release direction
+			targetMovement = eClockwise;
+		else
+			targetMovement = eC_Clockwise;
+
+		if (!inMovement)
+			inMovement = true;
 	}
-	else
-	{	
-		newForce = finger->getForce();
-
-		if (newForce > MAX_FORCE)	//Don't pull more than maximum
-			newForce = MAX_FORCE;
-
-		if (newForce < MIN_FORCE)
-			newForce = MIN_FORCE;
+	else if (((curTicks > moveToTicks) && (inMovement)) || ((curTicks > moveToTicks+THRESHOLD_TICKS) && (!inMovement)))	//Need to release string
+	{
+		if (isPullClockwise)	//figure release direction
+			targetMovement = eC_Clockwise;		
+		else 
+			targetMovement = eClockwise;
 		
-		double forceRatio = (double) newForce / MAX_FORCE;	//How much force is exerted relative to the max
-		//double relativeLocationFactor = (MAX_SERVO_LOCATION - MIN_SERVO_LOCATION);
-
-		targetTicks = (long) (forceRatio * maxTicks);	//move to relative location on motor
-		int pulleyLevel = (targetTicks / THRESHOLD_TICKS);
-		targetTicks = (long) (pulleyLevel * THRESHOLD_TICKS);
+		if (!inMovement)
+			inMovement = true;
 	}
-	
-	if (curTicks < targetTicks)		//Need to pull string
+	else 
 	{
-		if ((curTicks <= (targetTicks-THRESHOLD_TICKS)) || (targetTicks == maxTicks))		//move if target further than threshold or at top edge
-		//if ((curTicks > 0) || (targetTicks >= THRESHOLD_TICKS))	//don't move when force is very weak
+		if (targetTicks == moveToTicks)
 		{
-			if (isPullClockwise)	//figure pull direction
-				targetMovement = eClockwise;		
-			else targetMovement = eC_Clockwise;
-
-			//++curTicks;
+			targetMovement = eStopped;		//Correct position
+			inMovement = false;
 		}
-		else targetMovement = eStopped;
+		else 
+		{
+			if (moveToTicks < targetTicks)		//Need to pull string
+			{
+				if (isPullClockwise)	//figure release direction
+					targetMovement = eClockwise;
+				else
+					targetMovement = eC_Clockwise;
+			}
+			
+			else if (moveToTicks > targetTicks)	//Need to release string
+			{
+				if (isPullClockwise)	//figure release direction
+					targetMovement = eC_Clockwise;		
+				else targetMovement = eClockwise;
+			}
+
+			moveToTicks = targetTicks;
+		}
 	}
 	
-	else if (curTicks > targetTicks)	//Need to release string
-	{
-		if ((curTicks >= (targetTicks+THRESHOLD_TICKS)) || ((targetTicks <= 0) && (curTicks > 2*MAX_SPEED_LEVEL)))
-		//if ((curTicks < maxTicks) || (targetTicks <= (maxTicks-THRESHOLD_TICKS)))	//don't move when force is slightly weaker than max
-		{
-			if (isPullClockwise)	//figure release direction
-				targetMovement = eC_Clockwise;		
-			else targetMovement = eClockwise;
 
-			//--curTicks;
-		}
-		else targetMovement = eStopped;
-	}
-	else targetMovement = eStopped;		//Correct position
+	oldTime = currentTime;
 
-	//updateSpeed(targetMovement);
-	
-		oldTime = currentTime;
-	if (getName() == "Right Leg")
-	myfile << "curMov:" << curMovement << ",tarMov:" << targetMovement <<",ticks:" << curTicks <<","<< targetTicks << "|" << speedLevel << endl;
+	if (getName() == "Right Hand")
+	myfile << "curMov:" << curMovement << ",tarMov:" << targetMovement <<",ticks:" << curTicks <<","<< moveToTicks << ","<< targetTicks <<"|sp:" << speedLevel << "|len:" << movLength << endl;
 	/*
 	if (getName() == "Left Leg" && (getch() == 'z'))
 	do
 	{
+		
 		//test1
-		motor->setMovement(eClockwise, 4);
+		motor->setMovement(eClockwise, 3);
 		Sleep(50);
-		motor->setMovement(eStopped, 4);
+		motor->setMovement(eStopped, 3);
 		Sleep(550);
-		motor->setMovement(eC_Clockwise, 4);
-		Sleep(72);
-		motor->setMovement(eStopped, 4);
+		motor->setMovement(eC_Clockwise, 3);
+		Sleep(50);
+		motor->setMovement(eStopped, 3);
 		Sleep(550);
+
+		Sleep(500);
 		//
 		
 		
-		motor->setMovement(eClockwise, 4);
-		Sleep(1250);
+		//motor->setMovement(eClockwise, 4);
+		//Sleep(1250);
 		//Sleep(1000);
 
-		motor->setMovement(eStopped, 4);
-		Sleep(3000);
-
+		//motor->setMovement(eStopped, 4);
+		//Sleep(3000);
+		/*
 		for (int i=0; i<3;i++)
 		{
 			motor->setMovement(eClockwise, 4);
@@ -191,15 +289,59 @@ void PuppetPart::move(ofstream& myfile)
 		
 		printf(" done\n");
 		getch();
+		
 		 
 
 	}
-	while (!_kbhit());
+	while (1);//!_kbhit());
 	*/
 
-	updateTicks(targetMovement, targetTicks);
+	/*
+	//  TEST SEGMENT
+	if (getName() == "Left Leg")
+	{
+		if (TESTDIR == 1)
+		{
+			if (TESTCOUNTER < 67)
+			{
+				targetMovement = eClockwise;
+				TESTCOUNTER++;
+			}
+			else if ((TESTCOUNTER >= 67) && (TESTCOUNTER < 100))
+			{
+				targetMovement = eStopped;
+				TESTCOUNTER++;
+			}
+			else if (TESTCOUNTER == 100)
+			{
+				TESTDIR = -1;
+				targetMovement = eC_Clockwise;
+			}
+		}
+		else if (TESTDIR == -1)
+		{
+			if ((TESTCOUNTER >= 100) && (TESTCOUNTER < 100+60))
+			{
+				TESTCOUNTER++;
+				targetMovement = eC_Clockwise;
+			}
+			else if (TESTCOUNTER < 200)
+			{
+				TESTCOUNTER++;
+				targetMovement = eStopped;
+			}
+			else if (TESTCOUNTER == 200)
+			{
+				TESTDIR = 1;
+				TESTCOUNTER = 0;
+				targetMovement = eClockwise;
+			}
+		}
+	*/
 
-	if (curMovement != targetMovement)	//Change motor movement
+	updateTicks(targetMovement, moveToTicks);
+
+	if (curMovement != targetMovement)//if ((curMovement != targetMovement) && (getName() == "Left Leg"))	//Change motor movement
 	{
 		if (motor) 
 			motor->setMovement(targetMovement, motorId);
@@ -208,10 +350,8 @@ void PuppetPart::move(ofstream& myfile)
 	}
 	
 	//currentTime = GetCounter();
-
-
 	
-	curForce = newForce;
+	//curForce = newForce;
 }
 
 bool PuppetPart::isActive()
@@ -226,69 +366,30 @@ void PuppetPart::setActive(bool activate)
 
 //Used to keep track of accelerations, stoppage and movement reversals of the servo
 void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
-{
-	/* ticks update when changing movement types
-	if (targetMovement == eStopped)
+{	
+
+	if (curMovement != targetMovement)	//Correct stopping
 	{
-		if (curMovement == eC_Clockwise)
-		{
-			if (isPullClockwise)
-				curTicks -= STOPPING_TICKS;
-			else curTicks += STOPPING_TICKS;
-		}
-		else	//Clockwise 
-		{
-			if (isPullClockwise)
-				curTicks += STOPPING_TICKS;
-			else curTicks -= STOPPING_TICKS;
-		}
-	}
-	else if (targetMovement == eC_Clockwise)
-	{
-		if (curMovement == eClockwise)
-		{
-			if (isPullClockwise)
-				curTicks += 2*STOPPING_TICKS;
-			else curTicks -= 2*STOPPING_TICKS;
-		}
-		else	//Stopped
-		{
-			if (isPullClockwise)
-				curTicks += STOPPING_TICKS;	//Don't reduce ticks yet
-			else curTicks -= STOPPING_TICKS;
-		}
-	}
-	else	//Clockwise
-	{
-		if (curMovement == eC_Clockwise)
-		{
-			if (isPullClockwise)
-				curTicks -= 2*STOPPING_TICKS;
-			else curTicks += 2*STOPPING_TICKS;
-		}
-		else	//Stopped
-		{
-			if (isPullClockwise)
-				curTicks -= STOPPING_TICKS;	//Don't increment ticks yet
-			else curTicks += STOPPING_TICKS;
-		}
+			if ((curMovement == eC_Clockwise) && (correction[0] == eC_Clockwise))  //compensate for counter clockwise weak stopping
+			{
+				if (isPullClockwise)
+					curTicks -= correction[movLength];
+				else
+					curTicks += correction[movLength];
+			}
+			else if ((curMovement == eClockwise) && (correction[0] == eClockwise))	//compensate for clockwise weak stopping
+			{
+				if (isPullClockwise)
+					curTicks += correction[movLength];
+				else
+					curTicks -= correction[movLength];
+			}
+
+			if (targetMovement == eStopped)
+				movLength = 0;
 	}
 
-	if (curTicks < MOVE_C_CLOCKWISE_LOCATION)	//Fix over adjustment
-		curTicks = MOVE_C_CLOCKWISE_LOCATION;
-	
-	else if (curTicks > MOVE_CLOCKWISE_LOCATION)  //Fix over adjustment
-		curTicks = MOVE_CLOCKWISE_LOCATION;
-		*/
 
-
-	//currentTime = GetCounter();
-	
-	//printf("time DIFF: %f" , currentTime - oldTime);
-
-	//oldTime = currentTime;
-	//measure time passed from start of movement, multiply by speed?, small movements should not count much?
-	
 	//update speed, update ticks
 	if (targetMovement == eClockwise) 
 	{
@@ -298,7 +399,9 @@ void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
 			speedLevel--;
 		
 		if (curMovement == eC_Clockwise)	//change speed direction fast
-			speedLevel = 1;
+			movLength = 0;
+
+		movLength++;
 	}
 	else if (targetMovement == eC_Clockwise)
 	{
@@ -308,18 +411,12 @@ void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
 			speedLevel++;
 
 		if (curMovement != eC_Clockwise)	//change speed direction
-			speedLevel = -1;
+			movLength = 0;
+
+		movLength++;
 	}
 	else	//Stopping
 	{
-		if (curMovement == eClockwise) //ccompensate for clockwise weak stopping
-		{
-			if (isPullClockwise)
-				curTicks++;
-			else
-				curTicks--;
-		}
-
 		/*
 		if (speedLevel > 0)
 			speedLevel--;
@@ -327,18 +424,60 @@ void PuppetPart::updateTicks(servoMovement& targetMovement, long& targetTicks)
 			speedLevel++;
 			*/
 		speedLevel = 0;
+		
 	}
 
 	//update ticks
 	curTicks += speedLevel;
-	/*if (speedLevel)
-	{
-		if (curTicks < targetTicks)
-			curTicks += speedLevel;
-		else if (curTicks < targetTicks)
-			curTicks -= speedLevel;
-	}*/
 }
+
+void PuppetPart::calcTargetByForce()
+{
+	long newForce;
+
+	if (!active)		//Finger has been lifted, release part
+	{
+		targetTicks = MIN_FORCE;
+		newForce = MIN_FORCE;
+	}
+	else
+	{	
+		newForce = finger->getForce();
+
+		if (newForce > MAX_FORCE)	//Don't pull more than maximum
+			newForce = MAX_FORCE;
+
+		if (newForce < MIN_FORCE)
+			newForce = MIN_FORCE;
+		
+		double forceRatio = (double) newForce / MAX_FORCE;	//How much force is exerted relative to the max
+		//double relativeLocationFactor = (MAX_SERVO_LOCATION - MIN_SERVO_LOCATION);
+
+		string name = getName();
+		if (name == "Right Leg" || name == "Left Leg")
+		{
+			targetTicks = (long) (forceRatio * maxTicks);	//move to relative location on motor
+			if (targetTicks < LEG_TICKS_MID_LEVEL - THRESHOLD_TICKS)
+				targetTicks = 0;	//Stay
+			else if (targetTicks < LEG_TICKS_MID_LEVEL + THRESHOLD_TICKS)
+				targetTicks = LEG_TICKS_MID_LEVEL;
+			else targetTicks = LEG_MAX_TICKS;
+		}
+
+		else	//Hands + head
+		{
+			targetTicks = (long) (forceRatio * maxTicks);	//move to relative location on motor
+			if (targetTicks < HAND_TICKS_MID_LEVEL - THRESHOLD_TICKS)
+				targetTicks = 0;	//Stay
+			else if (targetTicks < HAND_TICKS_MID_LEVEL + THRESHOLD_TICKS)
+				targetTicks = HAND_TICKS_MID_LEVEL;
+			else targetTicks = HAND_MAX_TICKS;
+		}
+	}
+
+	curForce = newForce;
+}
+
 
 PuppetPart::~PuppetPart(void)
 {

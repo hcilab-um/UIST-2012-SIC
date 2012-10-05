@@ -25,7 +25,10 @@ void Finger::remove()
 void Finger::updateControl(PuppetPart* puppetPart)
 {
 	if ((!puppetPart) && (partControlled))	//received NULL, disconnect
+	{
+		remove();
 		partControlled->clearFinger();
+	}
 
 	partControlled = puppetPart;
 }

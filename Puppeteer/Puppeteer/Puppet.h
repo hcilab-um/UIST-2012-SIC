@@ -2,6 +2,7 @@
 #include "PuppetPart.h"
 #include <string>
 #include <map>
+#include <windows.h>
 
 #include <fstream>
 
@@ -18,7 +19,7 @@ public:
 	ofstream myfile;
 	map<string, PuppetPart*> body;
 	Puppet(void);
-	void move(handLocation curHandLocation, recordPlayCondition condition, FILE* recordFile);
+	void move(handLocation curHandLocation, recordPlayMode mode, FILE* recordFile);
 	void moveWheelsCenter();
 	~Puppet(void);
 };
